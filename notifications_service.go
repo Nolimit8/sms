@@ -3,8 +3,20 @@ package main
 import (
 	"bytes"
 	"encoding/xml"
-	"io/ioutil"
+	"fmt"
 	"net/http"
+	"time"
+)
+
+const (
+	SmsClubApiAddress       = "https://sms-fly.ua/api/api.php"
+	SendSmsOperationName    = "SENDSMS"
+	DefaultSmsStartTime     = "AUTO"
+	DefaultSmsEndTime       = "AUTO"
+	DefaultSmsSenderName    = "putivoditel"
+	DefaultSmsLifetime      = "4"
+	DefaultSmsRate          = "120"
+	SmsJobDescriptionFormat = "Daily notification job %s"
 )
 
 type SMSBatchNotification struct {
@@ -30,7 +42,7 @@ type SMSMessage struct {
 }
 
 type SMSNotificationsService interface {
-	SendSMSBatch(message SMSMessage) error
+	SendSMSBatch(message SMSBatchNotification) error
 }
 
 type SMSClubSMSNotificationsService struct {
@@ -39,35 +51,30 @@ type SMSClubSMSNotificationsService struct {
 }
 
 func (service SMSClubSMSNotificationsService) SendSMSBatch(notification SMSBatchNotification) error {
-	apiEndpoint := "https://sms-fly.ua/api/api.php"
 	client := &http.Client{}
 	requestBody := SMSRequest{
-		Operation: "SENDSMS",
+		Operation: SendSmsOperationName,
 		Message: SMSMessage{
-			StartTime:   "AUTO",
-			EndTime:     "AUTO",
-			Lifetime:    "4",
-			Rate:        "120",
-			Description: "Daily notification job",
-			Source:      "putivoditel",
+			StartTime:   DefaultSmsStartTime,
+			EndTime:     DefaultSmsEndTime,
+			Lifetime:    DefaultSmsLifetime,
+			Rate:        DefaultSmsRate,
+			Description: fmt.Sprintf(SmsJobDescriptionFormat, time.Now().String()),
+			Source:      DefaultSmsSenderName,
 			Body:        notification.Message,
 			Recipient:   notification.PhoneNumbers,
 		},
 	}
-	requestBodyBytes, marshalError := xml.MarshalIndent(requestBody, "", "")
+	requestBodyBytes, marshalError := xml.Marshal(requestBody)
 	if marshalError != nil {
 		return marshalError
 	}
 	print(string(requestBodyBytes))
-	request, requestError := http.NewRequest("POST", apiEndpoint, bytes.NewReader([]byte(xml.Header+string(requestBodyBytes))))
+	request, requestError := http.NewRequest(http.MethodPost, SmsClubApiAddress, bytes.NewReader([]byte(xml.Header+string(requestBodyBytes))))
 	if requestError != nil {
 		return requestError
 	}
 	request.SetBasicAuth(service.username, service.password)
-	resp, err := client.Do(request)
-	if resp != nil {
-		bodyBytes, _ := ioutil.ReadAll(resp.Body)
-		print(string(bodyBytes))
-	}
+	_, err := client.Do(request)
 	return err
 }
