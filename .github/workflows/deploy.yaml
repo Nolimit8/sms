@@ -12,6 +12,7 @@ jobs:
         uses: google-github-actions/deploy-cloud-functions@main
         with:
           region: us-central1
+          env_vars: NP_API_KEY=${{ secrets.NP_API_KEY }},SMS_CLUB_USERNAME=${{ secrets.SMS_CLUB_USERNAME }},SMS_CLUB_PASSWORD=${{ secrets.SMS_CLUB_PASSWORD }}
           credentials: ${{ secrets.GCP_SA_KEY }}
           name: customer-reminder
           source_dir: ./job
