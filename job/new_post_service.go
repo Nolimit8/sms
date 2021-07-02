@@ -1,4 +1,4 @@
-package main
+package job
 
 import (
 	"bytes"
@@ -69,8 +69,7 @@ func (n NewPostServiceImpl) FilterInternetDocumentsAwaitingPickup(documents []In
 	for currentIndex := range documents {
 		document := documents[currentIndex]
 		documentDeliveryStatus := document.DeliveryStatus
-		// todo : 1 is used for testing. change this to 7 or 8
-		if documentDeliveryStatus == "1" {
+		if documentDeliveryStatus == "7" || documentDeliveryStatus == "8" {
 			awaitingPickup = append(awaitingPickup, document)
 		}
 	}
