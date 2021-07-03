@@ -5,24 +5,42 @@ type Job interface {
 }
 
 type ReminderJob struct {
-	newPostService          NewPostService
-	smsNotificationsService SMSNotificationsService
-	notificationText        string
+	newPostService           NewPostService
+	smsNotificationsService  SMSNotificationsService
+	notificationTextProvider MessageProvider
 }
 
-func (job ReminderJob) RunJob() error {
+type InternetDocumentHandler interface {
+	HandleInternetDocument(document InternetDocument) error
+}
+
+type InternetDocumentSMSDispatcher struct {
+	smsNotificationsService  SMSNotificationsService
+	notificationTextProvider MessageProvider
+}
+
+func (job ReminderJob) RunJob() []error {
 	internetDocuments, internetDocumentsFetchingError := job.newPostService.GetAllInternetDocuments()
 	if internetDocumentsFetchingError != nil {
-		return internetDocumentsFetchingError
+		return []error{internetDocumentsFetchingError}
 	}
+	var errors []error
 	internetDocumentsAwaitingPickup := job.newPostService.FilterInternetDocumentsAwaitingPickup(internetDocuments)
-	var phoneNumbers []string
 	for i := range internetDocumentsAwaitingPickup {
-		phoneNumbers = append(phoneNumbers, internetDocuments[i].RecipientContactPhone)
+		currentInternetDocument := internetDocumentsAwaitingPickup[i]
+		messageBody, messageGenerationError := job.notificationTextProvider.GetMessageForDispatchedInternetDocument(currentInternetDocument)
+		if messageGenerationError == nil {
+			smsDeliveryError := job.smsNotificationsService.SendSMSBatch(SMSBatchNotification{
+				PhoneNumbers: []string{currentInternetDocument.RecipientContactPhone},
+				Message:      messageBody,
+			})
+			if smsDeliveryError != nil {
+				errors = append(errors, smsDeliveryError)
+			}
+		} else {
+			errors = append(errors, messageGenerationError)
+		}
 	}
-	smsDeliveryError := job.smsNotificationsService.SendSMSBatch(SMSBatchNotification{
-		PhoneNumbers: phoneNumbers,
-		Message:      job.notificationText,
-	})
-	return smsDeliveryError
+	return errors
+
 }
