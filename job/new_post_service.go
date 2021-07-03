@@ -11,6 +11,8 @@ type InternetDocument struct {
 	ReferenceId           string `json:"Ref"`
 	RecipientContactPhone string `json:"RecipientContactPhone"`
 	DeliveryStatus        string `json:"StateId"`
+	StatusUpdateDate      string `json:"DateLastUpdatedStatus"`
+	RecipientName         string `json:"RecipientContactPerson"`
 }
 
 type NewPostRequest struct {
