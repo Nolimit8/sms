@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"time"
 )
@@ -69,12 +70,13 @@ func (service SMSClubSMSNotificationsService) SendSMSBatch(notification SMSBatch
 	if marshalError != nil {
 		return marshalError
 	}
-	print(string(requestBodyBytes))
 	request, requestError := http.NewRequest(http.MethodPost, SmsClubApiAddress, bytes.NewReader([]byte(xml.Header+string(requestBodyBytes))))
 	if requestError != nil {
 		return requestError
 	}
 	request.SetBasicAuth(service.username, service.password)
-	_, err := client.Do(request)
+	resp, err := client.Do(request)
+	responseBodyBytes, _ := ioutil.ReadAll(resp.Body)
+	print(string(responseBodyBytes))
 	return err
 }

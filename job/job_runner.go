@@ -15,13 +15,13 @@ func RunJob(w http.ResponseWriter, _ *http.Request) {
 		password: os.Getenv("SMS_CLUB_PASSWORD"),
 	}
 	job := ReminderJob{
-		newPostService:          newPostService,
-		smsNotificationsService: notificationsService,
-		notificationText:        "Test message",
+		newPostService:           newPostService,
+		smsNotificationsService:  notificationsService,
+		notificationTextProvider: DaysAwareMessageProvider{},
 	}
 	jobError := job.RunJob()
-	if jobError != nil {
-		w.Write([]byte(jobError.Error()))
+	for i := range jobError {
+		w.Write([]byte(jobError[i].Error()))
 	}
 	w.Write([]byte("Job completed successfully"))
 }
