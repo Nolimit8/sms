@@ -41,6 +41,22 @@ func (job ReminderJob) RunJob() []error {
 			errors = append(errors, messageGenerationError)
 		}
 	}
+	createdInternetDocuments := job.newPostService.FilterDispatchedInternetDocuments(internetDocuments)
+	for i := range createdInternetDocuments {
+		currentInternetDocument := createdInternetDocuments[i]
+		messageBody, messageGenerationError := job.notificationTextProvider.GetMessageForCreatedInternetDocument(currentInternetDocument)
+		if messageGenerationError == nil {
+			smsDeliveryError := job.smsNotificationsService.SendSMSBatch(SMSBatchNotification{
+				PhoneNumbers: []string{currentInternetDocument.RecipientContactPhone},
+				Message:      messageBody,
+			})
+			if smsDeliveryError != nil {
+				errors = append(errors, smsDeliveryError)
+			}
+		} else {
+			errors = append(errors, messageGenerationError)
+		}
+	}
 	return errors
 
 }
