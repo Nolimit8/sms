@@ -28,7 +28,7 @@ func (job ReminderJob) RunJob() []error {
 	internetDocumentsAwaitingPickup := job.newPostService.FilterInternetDocumentsAwaitingPickup(internetDocuments)
 	for i := range internetDocumentsAwaitingPickup {
 		currentInternetDocument := internetDocumentsAwaitingPickup[i]
-		messageBody, messageGenerationError := job.notificationTextProvider.GetMessageForDispatchedInternetDocument(currentInternetDocument)
+		messageBody, messageGenerationError := job.notificationTextProvider.GetMessageForInternetDocumentsAwaitingPickup(currentInternetDocument)
 		if messageGenerationError == nil {
 			smsDeliveryError := job.smsNotificationsService.SendSMSBatch(SMSBatchNotification{
 				PhoneNumbers: []string{currentInternetDocument.RecipientContactPhone},

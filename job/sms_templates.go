@@ -1,9 +1,9 @@
 package job
 
-type DispatchedDocumentSMSTemplates int
+type DocumentsAwaitingPickupSMSTemplate int
 
 const (
-	Day1 DispatchedDocumentSMSTemplates = iota
+	Day1 DocumentsAwaitingPickupSMSTemplate = iota
 	Day2
 	Day3
 	Day4
@@ -13,7 +13,7 @@ const (
 	Day8
 )
 
-func (t DispatchedDocumentSMSTemplates) GetTemplate() string {
+func (t DocumentsAwaitingPickupSMSTemplate) GetTemplate() string {
 	return [...]string{
 		"День прибытия: {{.StatusUpdateDate}}",
 		"{{.RecipientName}}, ваш заказ доставлен: https://putivoditel.store/buy",
@@ -25,3 +25,5 @@ func (t DispatchedDocumentSMSTemplates) GetTemplate() string {
 		"Напоминаем, что сегодня последний день перед возвратом плаката 📦♻️\nЗаберите посылку или свяжитесь с нами, если не успеваете 📮📲",
 	}[t]
 }
+
+const DispatchedDocumentSMSTemplate = "Ваш плакат отправлен ({{.ReferenceId}}) 🚚"
