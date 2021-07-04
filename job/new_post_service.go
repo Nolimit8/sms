@@ -25,6 +25,7 @@ type NewPostRequest struct {
 type NewPostService interface {
 	GetAllInternetDocuments() ([]InternetDocument, error)
 	FilterInternetDocumentsAwaitingPickup([]InternetDocument) []InternetDocument
+	FilterDispatchedInternetDocuments([]InternetDocument) []InternetDocument
 }
 
 type GetInternetDocumentsResponse struct {
@@ -72,6 +73,18 @@ func (n NewPostServiceImpl) FilterInternetDocumentsAwaitingPickup(documents []In
 		document := documents[currentIndex]
 		documentDeliveryStatus := document.DeliveryStatus
 		if documentDeliveryStatus == "7" || documentDeliveryStatus == "8" {
+			awaitingPickup = append(awaitingPickup, document)
+		}
+	}
+	return awaitingPickup
+}
+
+func (n NewPostServiceImpl) FilterDispatchedInternetDocuments(documents []InternetDocument) []InternetDocument {
+	var awaitingPickup []InternetDocument
+	for currentIndex := range documents {
+		document := documents[currentIndex]
+		documentDeliveryStatus := document.DeliveryStatus
+		if documentDeliveryStatus == "1" {
 			awaitingPickup = append(awaitingPickup, document)
 		}
 	}
