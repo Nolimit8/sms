@@ -8,11 +8,11 @@ import (
 )
 
 type InternetDocument struct {
-	ReferenceId           string `json:"Ref"`
-	RecipientContactPhone string `json:"RecipientContactPhone"`
-	DeliveryStatus        string `json:"StateId"`
-	StatusUpdateDate      string `json:"DateLastUpdatedStatus"`
-	RecipientName         string `json:"RecipientContactPerson"`
+	ReferenceId           string `json:"Number"`
+	RecipientContactPhone string `json:"PhoneRecipient"`
+	DeliveryStatus        string `json:"TrackingStatusCode"`
+	StatusUpdateDate      string `json:"TrackingUpdateDate"`
+	RecipientName         string `json:"RecipientName"`
 }
 
 type NewPostRequest struct {
@@ -42,7 +42,7 @@ func (n NewPostServiceImpl) GetAllInternetDocuments() ([]InternetDocument, error
 	requestUrl := "https://api.novaposhta.ua/v2.0/json/"
 	requestBody := NewPostRequest{
 		ModelName:    "InternetDocument",
-		CalledMethod: "getDocumentList",
+		CalledMethod: "getOutgoingDocumentsByPhone",
 		MethodProperties: map[string]string{
 			"GetFullList":  "1",
 			"DateTimeFrom": "01.01.2021",
