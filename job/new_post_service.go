@@ -15,6 +15,10 @@ type InternetDocument struct {
 	RecipientName         string `json:"RecipientName"`
 }
 
+type InternetDocumentsDataResponse struct {
+	Result []InternetDocument `json:"result"`
+}
+
 type NewPostRequest struct {
 	ModelName        string            `json:"modelName"`
 	CalledMethod     string            `json:"calledMethod"`
@@ -29,9 +33,9 @@ type NewPostService interface {
 }
 
 type GetInternetDocumentsResponse struct {
-	Success bool               `json:"success"`
-	Data    []InternetDocument `json:"data"`
-	Errors  []string           `json:"errors"`
+	Success bool                            `json:"success"`
+	Data    []InternetDocumentsDataResponse `json:"data"`
+	Errors  []string                        `json:"errors"`
 }
 
 type NewPostServiceImpl struct {
@@ -61,7 +65,7 @@ func (n NewPostServiceImpl) GetAllInternetDocuments() ([]InternetDocument, error
 		return nil, jsonError
 	}
 	if response.Success == true {
-		return response.Data, nil
+		return response.Data[0].Result, nil
 	} else {
 		return nil, errors.New("failed to fetch internet documents")
 	}
